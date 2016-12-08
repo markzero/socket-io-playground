@@ -9,31 +9,30 @@ var app = express();
 var server = http.createServer(app);
 var io = socketIO(server);
 
+var {generateMessage} = require('./utils/message');
+
 app.use(express.static(publicPath));
 
 io.on('connection', (socket) => {
     console.log('New user connected');
 
     // send only to me when i join
-    socket.emit('newMessage', {
+    socket.emit('newMessage', generateMessage({
         from: 'Admin',
-        text: 'Welcome to chat!',
-        createdAt: new Date().getTime()
-    });
+        text: 'Welcome to chat!'
+    }));
 
     // send to everyone except me
-    socket.broadcast.emit('newMessage', {
+    socket.broadcast.emit('newMessage', generateMessage({
         from: 'Admin',
-        text: 'New user joined',
-        createdAt: new Date().getTime()
-    });
+        text: 'New user joined'
+    }));
 
     socket.on('createMessage', (message) => {
-        io.emit('newMessage', {
+        io.emit('newMessage', generateMessage({
             from: message.from,
-            text: message.text,
-            createdAt: new Date().getTime()
-        });
+            text: message.text
+        }));
     });
 
     socket.on('disconnect', () => {
